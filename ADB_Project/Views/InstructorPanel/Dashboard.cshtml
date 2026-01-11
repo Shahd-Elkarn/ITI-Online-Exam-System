@@ -1,0 +1,361 @@
+﻿@model ADB_Project.Models.ViewModels.InstructorDashboardVM
+
+@{
+    ViewData["Title"] = "Instructor Dashboard";
+}
+
+<!-- Custom CSS (same as Admin with instructor colors) -->
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #233047 0%, #1d2533 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    .stat-card {
+        border-radius: 12px;
+        padding: 25px;
+        height: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.8;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .chart-container h5 {
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+            .chart-container h5 i {
+                margin-right: 10px;
+                color: #495057;
+            }
+
+    .chart-wrapper {
+        flex: 1;
+        position: relative;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .chart-wrapper canvas {
+            max-height: 300px !important;
+            width: 100% !important;
+        }
+
+    .dashboard-section {
+        margin-bottom: 40px;
+    }
+
+    .recent-exams-card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        background: white;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #233047 0%, #1d2533 100%);
+        color: white;
+        font-weight: 600;
+        padding: 20px 25px;
+        font-size: 1.1rem;
+    }
+
+    .exam-item {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 20px 25px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+        .exam-item:hover {
+            background: #f8f9fa;
+            padding-left: 28px;
+            border-left: 3px solid #4A90E2;
+        }
+
+        .exam-item:last-child {
+            border-bottom: none;
+        }
+
+    .exam-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.05rem;
+        margin-bottom: 5px;
+    }
+
+    .exam-meta {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .exam-date-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+
+    .btn-quick {
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 30px;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Welcome Back, Instructor! 👋</h1>
+                <p class="lead mb-0">Manage your courses, exams, and track student performance</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-light text-dark px-3 py-2">
+                    <i class="fas fa-calendar-alt me-2"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
+                </span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Stats Cards -->
+    <div class="row g-4 dashboard-section">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-primary text-white">
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                <div class="stat-number">@Model.TotalCourses</div>
+                <div class="stat-label">My Courses</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-success text-white">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-number">@Model.TotalStudents</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-info text-white">
+                <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-number">@Model.TotalExams</div>
+                <div class="stat-label">Created Exams</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-warning text-white">
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-number">@Model.AverageGrade.ToString("F1")%</div>
+                <div class="stat-label">Average Student Grade</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 dashboard-section">
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5><i class="fas fa-chart-bar me-2"></i>Exams by Status</h5>
+                <div class="chart-wrapper">
+                    <canvas id="examsStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5><i class="fas fa-chart-pie me-2"></i>Course Status Distribution</h5>
+                <div class="chart-wrapper">
+                    <canvas id="courseStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Recent Exams -->
+    <div class="dashboard-section">
+        <div class="recent-exams-card">
+            <div class="card-header-custom">
+                <i class="fas fa-clock me-2"></i>Recent Exams
+            </div>
+            <div>
+                @if (Model.RecentExams != null && Model.RecentExams.Any())
+                {
+                    foreach (var exam in Model.RecentExams)
+                    {
+                        <a asp-action="ExamDetails" asp-route-examId="@exam.ExamId" class="exam-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="exam-title">@exam.ExamName</div>
+                                    <div class="exam-meta">
+                                        <i class="fas fa-book-open me-1"></i>@exam.Course.CourseName
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-question-circle me-1"></i>@exam.TotalQuestions questions
+                                    </div>
+                                </div>
+                                <span class="exam-date-badge">
+                                    <i class="fas fa-calendar me-1"></i>@exam.ExamDate.ToString()
+                                </span>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>No exams created yet. Start by creating your first exam!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a asp-action="MyCourses" class="btn btn-primary btn-quick">
+            <i class="fas fa-book me-2"></i>My Courses
+        </a>
+        <a asp-action="GenerateExam" class="btn btn-success btn-quick">
+            <i class="fas fa-plus-circle me-2"></i>Generate Exam
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Exams by Status (Bar Chart)
+        new Chart(document.getElementById('examsStatusChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Created', 'Ongoing', 'Completed', 'Graded'],
+                datasets: [{
+                    label: 'Exams',
+                    data: [@Model.ExamsCreated, @Model.ExamsOngoing, @Model.ExamsCompleted, @Model.ExamsGraded],
+                    backgroundColor: ['#007bff', '#ffc107', '#28a745', '#6f42c1']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Course Status (Doughnut)
+        new Chart(document.getElementById('courseStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Active Courses', 'Inactive Courses'],
+                datasets: [{
+                    data: [@Model.ActiveCourses, @Model.InactiveCourses],
+                    backgroundColor: ['#198754', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    </script>
+}
