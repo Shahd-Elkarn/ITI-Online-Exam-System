@@ -13,5 +13,7 @@
         public bool HasStarted { get; set; }
         public bool HasSubmitted { get; set; }
         public bool HasGrade { get; set; }
+        public bool IsExpired { get; set; }
+        public bool IsOverdue { get; set; }
     }
 }

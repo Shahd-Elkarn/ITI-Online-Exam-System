@@ -8,5 +8,7 @@
         public int DurationMinutes { get; set; }
         public DateTime StartTime { get; set; }
         public List<ExamQuestionVM> Questions { get; set; } = new();
+        public DateTime EndTime { get; internal set; }
+        public DateTime? ExamDate { get; set; }
     }
 }

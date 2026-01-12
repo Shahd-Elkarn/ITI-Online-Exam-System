@@ -111,11 +111,9 @@ namespace ADB_Project.Controllers
 
                 return RedirectToAction("TakeExam", new { examId });
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                TempData["Error"] = ex.Message.Contains("not assigned")
-                    ? "This exam is not assigned to you."
-                    : "Error starting exam: " + ex.Message;
+                TempData["Error"] = ex.Message;  
                 return RedirectToAction("Exams");
             }
         }
@@ -125,6 +123,19 @@ namespace ADB_Project.Controllers
         {
             var studentId = await GetCurrentStudentIdAsync();
             if (!studentId.HasValue) return Unauthorized();
+
+            // Fetch exam details for time check
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.ExamId == examId);
+            if (exam == null) return NotFound();
+
+            var now = DateTime.Now;
+            var endTime = exam.ExamDate?.AddMinutes(exam.DurationMinutes ?? 60) ?? now;
+
+            if (now < exam.ExamDate || now > endTime)
+            {
+                TempData["Error"] = now < exam.ExamDate ? "Cannot access exam before scheduled time." : "Exam time has expired.";
+                return RedirectToAction("Exams");
+            }
 
             var assignment = await _context.ExamAssignments
                 .Include(ea => ea.Exam)
@@ -183,18 +194,47 @@ namespace ADB_Project.Controllers
             var studentId = await GetCurrentStudentIdAsync();
             if (!studentId.HasValue) return Unauthorized();
 
-            // Validate that exam is assigned and started
-            var studentExam = await _context.StudentExams
-                .FirstOrDefaultAsync(se => se.StudentId == studentId.Value && se.ExamId == ExamId);
-
-            if (studentExam == null || studentExam.SubmittedDate != null)
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.ExamId == ExamId);
+            if (exam == null)
             {
-                TempData["Error"] = "Invalid exam state.";
+                TempData["Error"] = "Exam not found.";
                 return RedirectToAction("Exams");
             }
 
-            // Build JSON array: [{"QuestionID":1,"ChoiceID":5}, ...]
+            var studentExam = await _context.StudentExams
+                .FirstOrDefaultAsync(se => se.StudentId == studentId.Value && se.ExamId == ExamId);
+
+            if (studentExam == null)
+            {
+                TempData["Error"] = "No exam session found for this student.";
+                return RedirectToAction("Exams");
+            }
+
+            var now = DateTime.Now;
+
+            // حساب وقت النهاية المجدول
+            var scheduledEnd = exam.ExamDate.HasValue
+                ? exam.ExamDate.Value.AddMinutes(exam.DurationMinutes ?? 60)
+                : now.AddHours(24); // fallback طويل جدًا (يمكنك تعديله حسب سياستك)
+
+            // حساب وقت النهاية الشخصي (من وقت البدء)
+            var personalEnd = studentExam.StartTime.HasValue
+    ? studentExam.StartTime.Value.AddMinutes(exam.DurationMinutes ?? 60)
+    : now.AddMinutes(exam.DurationMinutes ?? 60);
+
+            // نأخذ أقرب (أصغر) وقت نهاية
+            var effectiveEnd = personalEnd < scheduledEnd ? personalEnd : scheduledEnd;
+
+            // التحقق من انتهاء الوقت
+            if (now > effectiveEnd)
+            {
+                TempData["Error"] = "Exam time has expired. Submission rejected.";
+                return RedirectToAction("TakeExam", new { examId = ExamId });
+            }
+
+            // باقي الكود (بناء الـ JSON و Submit و Correction)
             var answers = new List<object>();
+
             foreach (var q in Questions)
             {
                 if (q.SelectedChoiceId.HasValue && q.SelectedChoiceId.Value > 0)
@@ -217,12 +257,10 @@ namespace ADB_Project.Controllers
                     new SqlParameter("@ExamID", ExamId),
                     new SqlParameter("@AnswersJSON", json));
 
-                // Update StudentExam as submitted
                 studentExam.SubmittedDate = DateTime.Now;
                 studentExam.EndTime = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                // Auto-correct the exam
                 await _context.Database.ExecuteSqlRawAsync(
                     "EXEC dbo.ExamCorrection @ExamID",
                     new SqlParameter("@ExamID", ExamId));
@@ -241,12 +279,15 @@ namespace ADB_Project.Controllers
         public async Task<IActionResult> ExamResult(int examId)
         {
             var studentId = await GetCurrentStudentIdAsync();
-            if (!studentId.HasValue) return Unauthorized();
+            if (!studentId.HasValue)
+                return Unauthorized();
 
             var grade = await _context.ExamGrades
-                .Include(eg => eg.Exam)
+                .Include(g => g.Exam)
                     .ThenInclude(e => e.Course)
-                .FirstOrDefaultAsync(eg => eg.ExamId == examId && eg.StudentId == studentId.Value);
+                .FirstOrDefaultAsync(g =>
+                    g.ExamId == examId &&
+                    g.StudentId == studentId.Value);
 
             if (grade == null)
             {
@@ -254,7 +295,6 @@ namespace ADB_Project.Controllers
                 return RedirectToAction("Exams");
             }
 
-            // Get formatted answers for review
             var parameters = new[]
             {
         new SqlParameter("@ExamID", examId),
@@ -262,8 +302,10 @@ namespace ADB_Project.Controllers
     };
 
             var formattedAnswers = await _context.Database
-     .SqlQueryRaw<FormattedAnswerVM>("EXEC sp_ExamStudentAnswersFormatted @ExamID, @StudentID", parameters)
-     .ToListAsync();
+                .SqlQueryRaw<FormattedAnswerVM>(
+                    "EXEC sp_ExamStudentAnswersFormatted @ExamID, @StudentID",
+                    parameters)
+                .ToListAsync();
 
             var model = new ExamResultVM
             {
@@ -271,7 +313,7 @@ namespace ADB_Project.Controllers
                 CourseName = grade.Exam.Course.CourseName,
                 TotalScore = grade.TotalScore,
                 MaxScore = grade.MaxScore,
-                Percentage = grade.Percentage ?? 0,
+                Percentage = (grade.Percentage ?? 0), // Use decimal directly
                 Grade = grade.Grade ?? "N/A",
                 Status = grade.Status ?? "Pending",
                 FormattedAnswers = formattedAnswers
@@ -279,6 +321,7 @@ namespace ADB_Project.Controllers
 
             return View(model);
         }
+
         // GET: /StudentPanel/MyCourses
         public async Task<IActionResult> MyCourses()
         {
