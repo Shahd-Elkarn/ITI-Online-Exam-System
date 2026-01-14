@@ -165,9 +165,26 @@
             @if (User.IsInRole("Student"))
             {
                 <!-- Student Menu -->
-                <a class="@(controller == "StudentPanel" && action == "Dashboard" ? "active" : "")" asp-controller="StudentPanel" asp-action="Dashboard">
-                    <i class="fas fa-home"></i> Dashboard
+                <a class="@(controller == "StudentPanel" && action == "Dashboard" ? "active" : "")"
+                   asp-controller="StudentPanel" asp-action="Dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
                 </a>
+
+                <a class="@(controller == "StudentPanel" && action == "MyCourses" ? "active" : "")"
+                   asp-controller="StudentPanel" asp-action="MyCourses">
+                    <i class="fas fa-book-open"></i> My Courses
+                </a>
+
+                <a class="@(controller == "StudentPanel" && action == "Exams" ? "active" : "")"
+                   asp-controller="StudentPanel" asp-action="Exams">
+                    <i class="fas fa-file-alt"></i> Exams
+                </a>
+
+                <a class="@(controller == "StudentPanel" && action == "Results" ? "active" : "")"
+                   asp-controller="StudentPanel" asp-action="Results">
+                    <i class="fas fa-poll"></i> Results
+                </a>
+
             }
             else if (User.IsInRole("Instructor"))
             {

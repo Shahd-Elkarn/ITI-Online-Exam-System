@@ -119,12 +119,13 @@ namespace ADB_Project.Controllers
         }
 
         // ================ TAKE EXAM PAGE ================
+    [HttpGet]
         public async Task<IActionResult> TakeExam(int examId)
         {
             var studentId = await GetCurrentStudentIdAsync();
             if (!studentId.HasValue) return Unauthorized();
 
-            // Fetch exam details for time check
+            // ================= Exam Time Check =================
             var exam = await _context.Exams.FirstOrDefaultAsync(e => e.ExamId == examId);
             if (exam == null) return NotFound();
 
@@ -133,17 +134,20 @@ namespace ADB_Project.Controllers
 
             if (now < exam.ExamDate || now > endTime)
             {
-                TempData["Error"] = now < exam.ExamDate ? "Cannot access exam before scheduled time." : "Exam time has expired.";
+                TempData["Error"] = now < exam.ExamDate
+                    ? "Cannot access exam before scheduled time."
+                    : "Exam time has expired.";
+
                 return RedirectToAction("Exams");
             }
 
+            // ================= Assignment Check =================
             var assignment = await _context.ExamAssignments
                 .Include(ea => ea.Exam)
                     .ThenInclude(e => e.Course)
-                .Include(ea => ea.Exam.ExamQuestions)
-                    .ThenInclude(eq => eq.Question)
-                    .ThenInclude(q => q.Choices)
-                .FirstOrDefaultAsync(ea => ea.ExamId == examId && ea.StudentId == studentId.Value);
+                .FirstOrDefaultAsync(ea =>
+                    ea.ExamId == examId &&
+                    ea.StudentId == studentId.Value);
 
             if (assignment == null)
             {
@@ -151,14 +155,50 @@ namespace ADB_Project.Controllers
                 return RedirectToAction("Exams");
             }
 
+            // ================= Student Exam Check =================
             var studentExam = await _context.StudentExams
-                .FirstOrDefaultAsync(se => se.ExamId == examId && se.StudentId == studentId.Value);
+                .FirstOrDefaultAsync(se =>
+                    se.ExamId == examId &&
+                    se.StudentId == studentId.Value);
 
             if (studentExam?.SubmittedDate != null)
             {
                 return RedirectToAction("ExamResult", new { examId });
             }
 
+            // ================= Get Questions (RANDOM Choices) =================
+            var rawQuestions = await _context.Database
+                .SqlQueryRaw<ExamQuestionRaw>(
+                    "EXEC dbo.GetExamForStudent @ExamID",
+                    new SqlParameter("@ExamID", examId))
+                .ToListAsync();
+
+            var questions = rawQuestions
+                .GroupBy(q => new
+                {
+                    q.QuestionID,
+                    q.QuestionText,
+                    q.QuestionType,
+                    q.Points,
+                    q.QuestionOrder
+                })
+                .OrderBy(g => g.Key.QuestionOrder)
+                .Select(g => new ExamQuestionVM
+                {
+                    QuestionId = g.Key.QuestionID,
+                    QuestionOrder = g.Key.QuestionOrder,
+                    QuestionText = g.Key.QuestionText,
+                    QuestionType = g.Key.QuestionType ?? "MCQ",
+                    Points = g.Key.Points,
+                    Choices = g.Select(c => new ChoiceVM
+                    {
+                        ChoiceId = c.ChoiceID,
+                        ChoiceText = c.ChoiceText
+                    }).ToList()
+                })
+                .ToList();
+
+            // ================= ViewModel =================
             var model = new TakeExamVM
             {
                 ExamId = examId,
@@ -166,25 +206,29 @@ namespace ADB_Project.Controllers
                 CourseName = assignment.Exam.Course.CourseName,
                 DurationMinutes = assignment.Exam.DurationMinutes ?? 60,
                 StartTime = studentExam?.StartTime ?? DateTime.Now,
-                Questions = assignment.Exam.ExamQuestions
-                    .OrderBy(eq => eq.QuestionOrder)
-                    .Select(eq => new ExamQuestionVM
-                    {
-                        QuestionId = eq.Question.QuestionId,
-                        QuestionOrder = eq.QuestionOrder,
-                        QuestionText = eq.Question.QuestionText,
-                        QuestionType = eq.Question.QuestionType ?? "MCQ",
-                        Points = eq.Question.Points ?? 1,
-                        Choices = eq.Question.Choices.Select(c => new ChoiceVM
-                        {
-                            ChoiceId = c.ChoiceId,
-                            ChoiceText = c.ChoiceText ?? ""
-                        }).ToList()
-                    }).ToList()
+                Questions = questions
             };
+
+            // ================= TIMER CALCULATION (UNCHANGED) =================
+            var nowTime = DateTime.Now;
+
+            var scheduledEnd = exam.ExamDate.HasValue
+                ? exam.ExamDate.Value.AddMinutes(exam.DurationMinutes ?? 60)
+                : nowTime.AddHours(24);
+
+            var personalEnd = studentExam?.StartTime.HasValue == true
+                ? studentExam.StartTime.Value.AddMinutes(exam.DurationMinutes ?? 60)
+                : nowTime.AddMinutes(exam.DurationMinutes ?? 60);
+
+            var effectiveEnd = personalEnd < scheduledEnd ? personalEnd : scheduledEnd;
+
+            ViewBag.RemainingSeconds =
+                (int)Math.Max(0, (effectiveEnd - nowTime).TotalSeconds);
 
             return View(model);
         }
+
+
 
         // ================ SUBMIT EXAM (Using JSON SP) ================
         [HttpPost]
