@@ -405,5 +405,32 @@ namespace ADB_Project.Controllers
 
             return View(courses);
         }
+        // ================ RESULTS PAGE ================
+        public async Task<IActionResult> Results()
+        {
+            var studentId = await GetCurrentStudentIdAsync();
+            if (!studentId.HasValue) return Unauthorized();
+
+            var results = await _context.ExamGrades
+                .Where(eg => eg.StudentId == studentId.Value)
+                .Include(eg => eg.Exam)
+                    .ThenInclude(e => e.Course)
+                .OrderByDescending(eg => eg.GradeDate)
+                .Select(eg => new ExamResultSummaryVM
+                {
+                    ExamId = eg.ExamId,
+                    ExamName = eg.Exam.ExamName,
+                    CourseName = eg.Exam.Course.CourseName,
+                    TotalScore = eg.TotalScore,
+                    MaxScore = eg.MaxScore,
+                    Percentage = eg.Percentage ?? 0,
+                    Grade = eg.Grade ?? "N/A",
+                    Status = eg.Status ?? "Pending",
+                    GradeDate = eg.GradeDate
+                })
+                .ToListAsync();
+
+            return View(results);
+        }
     }
 }

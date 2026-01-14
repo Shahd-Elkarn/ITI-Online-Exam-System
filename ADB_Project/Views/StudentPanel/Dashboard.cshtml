@@ -4,346 +4,464 @@
     ViewData["Title"] = "Student Dashboard";
 }
 
+<link rel="stylesheet" href="~/css/unified-design.css" />
+
 <style>
-    .dashboard-header {
-        background: linear-gradient(135deg, #233047 0%, #1d2533 100%);
-        color: white;
-        padding: 40px;
-        border-radius: 15px;
-        margin-bottom: 40px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: var(--spacing-xl);
     }
 
-        .dashboard-header h1 {
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-header p {
-            opacity: 0.9;
-            margin: 0;
-        }
-
-    .stat-card {
-        border-radius: 12px;
-        padding: 25px;
-        height: 100%;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Welcome Header */
+    .welcome-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-xl);
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
         position: relative;
         overflow: hidden;
     }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        .welcome-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
+
+    .welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .welcome-subtitle {
+        opacity: 0.95;
+        font-size: 1.125rem;
+    }
+
+    .date-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        transition: all var(--transition-base);
+        border-left: 4px solid transparent;
+    }
 
         .stat-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.1);
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            transform: translate(50%, -50%);
+            opacity: 0.1;
         }
 
-    .stat-icon {
-        font-size: 2.5rem;
-        opacity: 0.8;
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin: 10px 0;
-    }
-
-    .stat-label {
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        opacity: 0.8;
-    }
-
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-        .chart-container h5 {
-            margin-bottom: 25px;
-            font-weight: 700;
-            color: #2c3e50;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            font-size: 1.2rem;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
         }
 
-            .chart-container h5 i {
-                margin-right: 10px;
-                color: #495057;
+        .stat-card.primary {
+            border-left-color: var(--primary-start);
+        }
+
+            .stat-card.primary::before {
+                background: var(--primary-start);
             }
 
-    .chart-wrapper {
-        flex: 1;
-        position: relative;
-        min-height: 300px;
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+            .stat-card.success::before {
+                background: var(--success);
+            }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+            .stat-card.warning::before {
+                background: var(--warning);
+            }
+
+        .stat-card.info {
+            border-left-color: var(--info);
+        }
+
+            .stat-card.info::before {
+                background: var(--info);
+            }
+
+    .stat-header {
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 
-        .chart-wrapper canvas {
-            max-height: 300px !important;
-            width: 100% !important;
-        }
-
-    .dashboard-section {
-        margin-bottom: 40px;
-    }
-
-    .quick-actions-card {
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        background: white;
-        height: 100%;
-    }
-
-    .card-header-custom {
-        background: linear-gradient(135deg, #233047 0%, #1d2533 100%);
-        color: white;
-        font-weight: 600;
-        padding: 20px 25px;
-        font-size: 1.1rem;
-    }
-
-    .action-item {
-        border-bottom: 1px solid #f0f0f0;
-        padding: 20px 25px;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-
-        .action-item:hover {
-            background: #f8f9fa;
-            padding-left: 28px;
-            border-left: 3px solid #4A90E2;
-        }
-
-        .action-item:last-child {
-            border-bottom: none;
-        }
-
-    .action-title {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 1.05rem;
-        margin-bottom: 5px;
-    }
-
-    .action-description {
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .action-icon-wrapper {
+    .stat-icon {
         width: 50px;
         height: 50px;
-        border-radius: 10px;
+        border-radius: var(--radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
     }
 
-    .icon-primary {
-        background: rgba(74, 144, 226, 0.1);
-        color: #4A90E2;
+    .stat-card.primary .stat-icon {
+        background: rgba(102, 126, 234, 0.1);
+        color: var(--primary-start);
     }
 
-    .icon-success {
-        background: rgba(39, 174, 96, 0.1);
-        color: #27AE60;
+    .stat-card.success .stat-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
     }
 
-    .icon-info {
-        background: rgba(52, 152, 219, 0.1);
-        color: #3498DB;
+    .stat-card.warning .stat-icon {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
     }
 
-    .icon-warning {
-        background: rgba(243, 156, 18, 0.1);
-        color: #F39C12;
+    .stat-card.info .stat-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info);
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 60px 30px;
-        color: #6c757d;
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: var(--spacing-xs);
     }
 
-        .empty-state i {
-            font-size: 3.5rem;
-            opacity: 0.3;
-            margin-bottom: 20px;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            margin: 0;
-        }
-
-    .btn-quick {
-        padding: 12px 25px;
-        border-radius: 25px;
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         font-weight: 600;
-        transition: all 0.3s ease;
     }
 
-        .btn-quick:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* Charts Section */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .chart-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .chart-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+        .chart-header i {
+            color: var(--primary-start);
+            font-size: 1.25rem;
         }
 
-    
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .chart-wrapper {
+        height: 300px;
+        position: relative;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    .actions-header {
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+        .actions-header i {
+            font-size: 1.25rem;
+        }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0;
+    }
+
+    .action-item {
+        padding: var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
+        border-right: 1px solid var(--gray-200);
+        transition: all var(--transition-base);
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+        .action-item:hover {
+            background: var(--gray-50);
+            transform: translateX(5px);
+        }
+
+    .action-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+        .action-icon-wrapper.primary {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-start);
+        }
+
+        .action-icon-wrapper.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .action-icon-wrapper.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+    .action-content {
+        flex: 1;
+    }
+
+    .action-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .action-description {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .welcome-header {
+            padding: var(--spacing-lg);
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-item {
+            border-right: none;
+        }
+    }
 </style>
 
-<div class="container-fluid py-4">
-    <!-- Enhanced Header -->
-    <div class="dashboard-header">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1>Welcome Back, Student! 👋</h1>
-                <p class="lead mb-0">Track your courses, exams, and academic performance</p>
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="welcome-content">
+                <h1 class="welcome-title">
+                    Welcome Back, Student! 👋
+                </h1>
+                <p class="welcome-subtitle mb-0">
+                    Track your courses, exams, and academic performance
+                </p>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <span class="badge bg-light text-dark px-3 py-2">
-                    <i class="fas fa-calendar-alt me-2"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
-                </span>
+            <div class="date-badge">
+                <i class="fas fa-calendar-alt"></i>
+                @DateTime.Now.ToString("MMMM dd, yyyy")
             </div>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row g-4 dashboard-section">
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card bg-primary text-white">
-                <div class="stat-icon"><i class="fas fa-book"></i></div>
-                <div class="stat-number">@Model.EnrolledCourses</div>
-                <div class="stat-label">Enrolled Courses</div>
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
             </div>
+            <div class="stat-value">@Model.EnrolledCourses</div>
+            <div class="stat-label">Enrolled Courses</div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card bg-success text-white">
-                <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-                <div class="stat-number">@Model.AssignedExams</div>
-                <div class="stat-label">Assigned Exams</div>
+
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
             </div>
+            <div class="stat-value">@Model.AssignedExams</div>
+            <div class="stat-label">Assigned Exams</div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card bg-info text-white">
-                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-number">@Model.SubmittedExams</div>
-                <div class="stat-label">Submitted Exams</div>
+
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
             </div>
+            <div class="stat-value">@Model.SubmittedExams</div>
+            <div class="stat-label">Submitted Exams</div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card bg-warning text-white">
-                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                <div class="stat-number">@Model.PassedExams</div>
-                <div class="stat-label">Passed Exams</div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
             </div>
+            <div class="stat-value">@Model.PassedExams</div>
+            <div class="stat-label">Passed Exams</div>
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="row g-4 dashboard-section">
-        <div class="col-lg-6">
-            <div class="chart-container">
-                <h5><i class="fas fa-chart-bar"></i>Exam Performance</h5>
-                <div class="chart-wrapper">
-                    <canvas id="examPerformanceChart"></canvas>
-                </div>
+    <!-- Charts -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3 class="chart-title">Exam Performance</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="performanceChart"></canvas>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="chart-container">
-                <h5><i class="fas fa-chart-pie"></i>Exam Status Distribution</h5>
-                <div class="chart-wrapper">
-                    <canvas id="examStatusChart"></canvas>
-                </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3 class="chart-title">Exam Status Distribution</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="statusChart"></canvas>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="row g-4 dashboard-section">
-        <div class="col-12">
-            <div class="quick-actions-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-bolt me-2"></i>Quick Actions
+    <div class="quick-actions">
+        <div class="actions-header">
+            <i class="fas fa-bolt"></i>
+            <h3 class="mb-0">Quick Actions</h3>
+        </div>
+
+        <div class="actions-grid">
+            <a asp-action="MyCourses" class="action-item">
+                <div class="action-icon-wrapper primary">
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
-                <div class="row g-0">
-                    <div class="col-md-6">
-                        <a asp-action="MyCourses" class="action-item">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon-wrapper icon-primary me-3">
-                                    <i class="fas fa-graduation-cap"></i>
-                                </div>
-                                <div>
-                                    <div class="action-title">My Courses</div>
-                                    <div class="action-description">View and manage your enrolled courses</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-md-6">
-                        <a asp-action="Exams" class="action-item">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon-wrapper icon-success me-3">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div>
-                                    <div class="action-title">Take Exams</div>
-                                    <div class="action-description">Start or continue your assigned exams</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-md-6">
-                        <a asp-action="Results" class="action-item">
-                            <div class="d-flex align-items-center">
-                                <div class="action-icon-wrapper icon-info me-3">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div>
-                                    <div class="action-title">My Results</div>
-                                    <div class="action-description">Check your grades and performance</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    
+                <div class="action-content">
+                    <div class="action-title">My Courses</div>
+                    <div class="action-description">View and manage your enrolled courses</div>
                 </div>
-            </div>
+            </a>
+
+            <a asp-action="Exams" class="action-item">
+                <div class="action-icon-wrapper success">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="action-content">
+                    <div class="action-title">Take Exams</div>
+                    <div class="action-description">Start or continue your assigned exams</div>
+                </div>
+            </a>
+
+            <a asp-action="Results" class="action-item">
+                <div class="action-icon-wrapper info">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="action-content">
+                    <div class="action-title">My Results</div>
+                    <div class="action-description">Check your grades and performance</div>
+                </div>
+            </a>
         </div>
     </div>
 </div>
@@ -351,49 +469,56 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Calculate percentages
-        var totalExams = @Model.AssignedExams;
-        var pendingExams = totalExams - @Model.SubmittedExams;
-        var failedExams = @Model.SubmittedExams - @Model.PassedExams;
+        const totalExams = @Model.AssignedExams;
+        const pending = totalExams - @Model.SubmittedExams;
+        const failed = @Model.SubmittedExams - @Model.PassedExams;
 
-        // Exam Performance (Bar Chart)
-        new Chart(document.getElementById('examPerformanceChart'), {
+        // Performance Chart
+        new Chart(document.getElementById('performanceChart'), {
             type: 'bar',
             data: {
                 labels: ['Assigned', 'Submitted', 'Passed', 'Failed'],
                 datasets: [{
-                    label: 'Number of Exams',
-                    data: [@Model.AssignedExams, @Model.SubmittedExams, @Model.PassedExams, failedExams],
-                    backgroundColor: ['#007bff', '#3498DB', '#27AE60', '#e74c3c']
+                    label: 'Exams',
+                    data: [@Model.AssignedExams, @Model.SubmittedExams, @Model.PassedExams, failed],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderRadius: 8,
+                    borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
+                        ticks: { stepSize: 1 }
                     }
                 }
             }
         });
 
-        // Exam Status Distribution (Doughnut)
-        new Chart(document.getElementById('examStatusChart'), {
+        // Status Chart
+        new Chart(document.getElementById('statusChart'), {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Failed', 'Pending'],
                 datasets: [{
-                    data: [@Model.PassedExams, failedExams, pendingExams],
-                    backgroundColor: ['#27AE60', '#e74c3c', '#ffc107']
+                    data: [@Model.PassedExams, failed, pending],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ],
+                    borderWidth: 0
                 }]
             },
             options: {
@@ -401,7 +526,11 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 14 }
+                        }
                     }
                 }
             }
