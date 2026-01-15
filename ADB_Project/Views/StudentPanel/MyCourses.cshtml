@@ -14,43 +14,32 @@
 
     /* Page Header */
     .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #233047 0%, #1d2533 47%);
         color: white;
-        border-radius: var(--radius-xl);
-        padding: var(--spacing-2xl);
-        margin-bottom: var(--spacing-xl);
-        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-        position: relative;
-        overflow: hidden;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
 
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+        .page-header h2 {
+            margin: 0;
+            font-weight: 600;
         }
-
-    .header-content {
-        position: relative;
-        z-index: 1;
-    }
 
     .page-title {
         font-size: 2rem;
         margin-bottom: var(--spacing-sm);
         display: flex;
         align-items: center;
+        color: white;
         gap: var(--spacing-md);
     }
 
     .page-subtitle {
         opacity: 0.95;
         font-size: 1.125rem;
+        color: white;
     }
 
     /* Stats Cards */
@@ -400,7 +389,7 @@
             </div>
             <a asp-action="Dashboard" class="btn btn-outline" style="background: rgba(255,255,255,0.2); border-color: white; color: white;">
                 <i class="fas fa-arrow-left"></i>
-                Back
+                Back to Dashboard
             </a>
         </div>
     </div>

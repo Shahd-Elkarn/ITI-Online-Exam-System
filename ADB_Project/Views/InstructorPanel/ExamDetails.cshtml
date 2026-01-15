@@ -5,105 +5,488 @@
     ViewData["Title"] = "Exam Details - " + Model.ExamName;
 }
 
-<div class="container mt-4">
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #233047 0%, #1d2533 47%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+        .page-header h2 {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+            .page-header h2 i {
+                margin-right: 15px;
+                font-size: 1.8rem;
+            }
+
+    .page-header-subtitle {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .header-actions {
+        position: absolute;
+        top: 35px;
+        right: 40px;
+        display: flex;
+        gap: 10px;
+    }
+
+        .header-actions .btn {
+            background: white;
+            color: #2c3e50;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+            .header-actions .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+
+        .info-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .exam-type-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .questions-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+        .section-header h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+
+    .question-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+        .question-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+        }
+
+    .question-number {
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: #3498db;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .question-header {
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+
+    .question-text {
+        color: #2c3e50;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .question-meta {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        background: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+        .meta-badge i {
+            color: #3498db;
+        }
+
+    .choices-list {
+        margin-top: 20px;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .choice-item {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        background: white;
+        border-radius: 8px;
+        border-left: 3px solid #95a5a6;
+        transition: all 0.3s ease;
+    }
+
+        .choice-item.correct {
+            border-left-color: #27ae60;
+            background: #d4edda;
+            font-weight: 600;
+            color: #155724;
+        }
+
+            .choice-item.correct::before {
+                content: "✓";
+                margin-right: 10px;
+                color: #27ae60;
+                font-weight: bold;
+                font-size: 1.2rem;
+            }
+
+    .sidebar-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .sidebar-actions {
+        padding: 0;
+    }
+
+    .action-item {
+        padding: 18px 20px;
+        border-bottom: 1px solid #e9ecef;
+        color: #2c3e50;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .action-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-item:hover {
+            background: #f8f9fa;
+            color: #3498db;
+            padding-left: 30px;
+        }
+
+        .action-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+    .stats-mini {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 20px;
+        background: #f8f9fa;
+    }
+
+    .stat-mini-item {
+        text-align: center;
+    }
+
+    .stat-mini-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3498db;
+    }
+
+    .stat-mini-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    .correct-answer-box {
+        margin-top: 20px;
+        padding: 15px;
+        background: #d4edda;
+        border-radius: 8px;
+        border-left: 4px solid #27ae60;
+    }
+
+    .correct-answer-label {
+        color: #155724;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .correct-answer-value {
+        color: #155724;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h2><i class="fas fa-file-alt"></i>@Model.ExamName</h2>
+        <p class="page-header-subtitle">Detailed overview and question breakdown</p>
+        <div class="header-actions">
+            <a asp-action="AssignExam" asp-route-examId="@Model.ExamId" class="btn">
+                <i class="fas fa-users me-2"></i>Assign Exam
+            </a>
+            <a asp-action="ExamResults" asp-route-examId="@Model.ExamId" class="btn">
+                <i class="fas fa-chart-bar me-2"></i>View Results
+            </a>
+        </div>
+    </div>
+
     <div class="row">
+        <!-- Main Content -->
         <div class="col-lg-9">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white d-flex justify-content-between">
-                    <h3>@Model.ExamName</h3>
-                    <div>
-                        <a asp-action="AssignExam" asp-route-examId="@Model.ExamId" class="btn btn-light me-2">
-                            Assign Exam
-                        </a>
-                        <a asp-action="ExamResults" asp-route-examId="@Model.ExamId" class="btn btn-light">
-                            View Results
-                        </a>
+            <!-- Exam Information Card -->
+            <div class="info-card">
+                <div class="section-header">
+                    <h4><i class="fas fa-info-circle me-2"></i>Exam Information</h4>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Course</div>
+                        <div class="info-value">
+                            @Model.Course.CourseName
+                            <span class="badge bg-primary ms-2">@Model.Course.CourseCode</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Exam Type</div>
+                        <div class="info-value">
+                            <span class="exam-type-badge @(Model.ExamType == "Midterm" ? "bg-info" : Model.ExamType == "Final" ? "bg-danger" : "bg-warning")">
+                                @Model.ExamType
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Questions</div>
+                        <div class="info-value">
+                            <i class="fas fa-question-circle text-primary me-2"></i>@Model.TotalQuestions
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Degree</div>
+                        <div class="info-value">
+                            <i class="fas fa-star text-warning me-2"></i>@Model.TotalDegree points
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Duration</div>
+                        <div class="info-value">
+                            <i class="fas fa-clock text-info me-2"></i>@Model.DurationMinutes minutes
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Passing Score</div>
+                        <div class="info-value">
+                            @Model.PassingScore / @Model.TotalDegree
+                            <span class="badge bg-success ms-2">@((Model.PassingScore * 100.0 / Model.TotalDegree)?.ToString("F1"))%</span>
+                        </div>
+                    </div>
+                    <div class="info-item" style="grid-column: span 2;">
+                        <div class="info-label">Exam Date</div>
+                        <div class="info-value">
+                            <i class="fas fa-calendar-alt text-danger me-2"></i>
+                            @(Model.ExamDate?.ToString("dddd, dd MMMM yyyy") ?? "Not scheduled")
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <strong>Course:</strong> @Model.Course.CourseName (@Model.Course.CourseCode)
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Type:</strong>
-                            <span class="badge bg-info">@Model.ExamType</span>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Total Questions:</strong> @Model.TotalQuestions
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Total Degree:</strong> @Model.TotalDegree
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Duration:</strong> @Model.DurationMinutes minutes
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Passing Score:</strong> @Model.PassingScore (@((Model.PassingScore * 100.0 / Model.TotalDegree)?.ToString("F1"))%)
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Exam Date:</strong> @Model.ExamDate?.ToString("dddd, dd MMMM yyyy")
-                        </div>
-                    </div>
+            </div>
 
-                    <hr>
+            <!-- Questions Section -->
+            <div class="questions-section">
+                <div class="section-header">
+                    <h4><i class="fas fa-list-ol me-2"></i>Exam Questions</h4>
+                    <span class="badge bg-primary" style="font-size: 1rem; padding: 8px 16px;">
+                        @Model.ExamQuestions.Count Questions
+                    </span>
+                </div>
 
-                    <h4>Questions (@Model.ExamQuestions.Count)</h4>
-                    <ol class="list-group list-group-numbered">
-                        @foreach (var eq in Model.ExamQuestions.OrderBy(eq => eq.QuestionOrder))
+                @foreach (var eq in Model.ExamQuestions.OrderBy(eq => eq.QuestionOrder))
+                {
+                    var q = eq.Question;
+                    <div class="question-card">
+                        <span class="question-number">Question @eq.QuestionOrder</span>
+                        <div class="question-header">
+                            <div class="question-text">@q.QuestionText</div>
+                            <div class="question-meta">
+                                <span class="meta-badge">
+                                    <i class="fas fa-tag"></i>
+                                    @q.QuestionType
+                                </span>
+                                <span class="meta-badge">
+                                    <i class="fas fa-star"></i>
+                                    @q.Points points
+                                </span>
+                                <span class="meta-badge">
+                                    <i class="fas fa-signal"></i>
+                                    @q.DifficultyLevel
+                                </span>
+                            </div>
+                        </div>
+
+                        @if (q.QuestionType == "MCQ" && q.Choices.Any())
                         {
-                            var q = eq.Question;
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="me-3">
-                                        <strong>@q.QuestionText</strong>
-                                        <small class="text-muted d-block">(@q.QuestionType • @q.Points points • @q.DifficultyLevel)</small>
-                                    </div>
-                                    <span class="badge bg-secondary">Q@(eq.QuestionOrder)</span>
-                                </div>
-
-                                @if (q.QuestionType == "MCQ" && q.Choices.Any())
+                            <ul class="choices-list">
+                                @foreach (var choice in q.Choices)
                                 {
-                                    <ul class="list-unstyled mt-3 ms-4">
-                                        @foreach (var choice in q.Choices)
+                                    <li class="choice-item @(choice.IsCorrect == true ? "correct" : "")">
+                                        @choice.ChoiceText
+                                        @if (choice.IsCorrect == true)
                                         {
-                                            <li class="@(choice.IsCorrect == true ? "text-success fw-bold" : "")">
-                                                @choice.ChoiceText
-                                                @(choice.IsCorrect == true ? " ✅ (Correct)" : "")
-                                            </li>
+                                            <span class="badge bg-success ms-2">Correct Answer</span>
                                         }
-                                    </ul>
+                                    </li>
                                 }
-                                else if (q.QuestionType == "TF")
-                                {
-                                    <div class="mt-2 ms-4">
-                                        Correct Answer:
-                                        <strong class="text-success">
-                                            @(q.Choices.FirstOrDefault(c => c.IsCorrect == true)?.ChoiceText ?? "N/A")
-                                        </strong>
-                                    </div>
-                                }
-                            </li>
+                            </ul>
                         }
-                    </ol>
-                </div>
+                        else if (q.QuestionType == "TF")
+                        {
+                            <div class="correct-answer-box">
+                                <div class="correct-answer-label">
+                                    <i class="fas fa-check-circle me-2"></i>Correct Answer:
+                                </div>
+                                <div class="correct-answer-value">
+                                    @(q.Choices.FirstOrDefault(c => c.IsCorrect == true)?.ChoiceText ?? "N/A")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-lg-3">
-            <div class="card shadow sticky-top" style="top: 20px;">
-                <div class="card-header bg-light">
-                    <h5>Quick Actions</h5>
+            <div class="sidebar-card">
+                <div class="sidebar-header">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
                 </div>
-                <div class="list-group list-group-flush">
-                    <a asp-action="AssignExam" asp-route-examId="@Model.ExamId" class="list-group-item list-group-item-action">
-                        <i class="fas fa-users"></i> Assign to Students
+                <div class="stats-mini">
+                    <div class="stat-mini-item">
+                        <div class="stat-mini-value">@Model.TotalQuestions</div>
+                        <div class="stat-mini-label">Questions</div>
+                    </div>
+                    <div class="stat-mini-item">
+                        <div class="stat-mini-value">@Model.TotalDegree</div>
+                        <div class="stat-mini-label">Points</div>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <a asp-action="AssignExam" asp-route-examId="@Model.ExamId" class="action-item">
+                        <i class="fas fa-users"></i>
+                        <span>Assign to Students</span>
                     </a>
-                    <a asp-action="ExamResults" asp-route-examId="@Model.ExamId" class="list-group-item list-group-item-action">
-                        <i class="fas fa-chart-pie"></i> View Results & Stats
+                    <a asp-action="ExamResults" asp-route-examId="@Model.ExamId" class="action-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>View Results & Stats</span>
                     </a>
-                    <a asp-action="MyExams" class="list-group-item list-group-item-action">
-                        <i class="fas fa-arrow-left"></i> Back to My Exams
+                    <a asp-action="MyExams" class="action-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Back to My Exams</span>
+                    </a>
+                    <a asp-action="Dashboard" asp-controller="InstructorPanel" class="action-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
                     </a>
                 </div>
             </div>

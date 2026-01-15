@@ -79,7 +79,7 @@ namespace ADB_Project.Controllers
 
             var model = assignments.Select(ea => new StudentExamListVM
             {
-                ExamAssignmentId = ea.ExamId + "-" + ea.StudentId, // unique key
+                ExamAssignmentId = ea.ExamId + "-" + ea.StudentId,
                 ExamId = ea.ExamId,
                 ExamName = ea.Exam.ExamName,
                 CourseName = ea.Exam.Course.CourseName,

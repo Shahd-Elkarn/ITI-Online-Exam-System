@@ -116,7 +116,13 @@ namespace ADB_Project.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return RedirectToAction("Index", "Home");
+                    if (User.IsInRole("Student"))
+                        return RedirectToAction("Dashboard", "StudentPanel");
+                    else if (User.IsInRole("Admin"))
+                        return RedirectToAction("Dashboard", "Admin");
+                    else if (User.IsInRole("Instructor"))
+                            return RedirectToAction("Dashboard", "InstructorPanel");
+                    
                 }
                 if (result.RequiresTwoFactor)
                 {

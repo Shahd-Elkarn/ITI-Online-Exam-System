@@ -56,7 +56,7 @@ public virtual DbSet<Branch> Branches { get; set; }
     public virtual DbSet<Topic> Topics { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-     => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=ITITest;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30");
+     => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=OnlineExamSystem;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
